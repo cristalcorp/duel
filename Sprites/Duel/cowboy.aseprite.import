@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://8tidj75d0pqk"
+path="res://.godot/imported/cowboy.aseprite-706be680f5f74308c00fda33b35db52a.res"
+
+[deps]
+
+source_file="res://Sprites/Duel/cowboy.aseprite"
+dest_files=["res://.godot/imported/cowboy.aseprite-706be680f5f74308c00fda33b35db52a.res"]
+
+[params]
+
