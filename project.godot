@@ -24,6 +24,10 @@ window/size/viewport_width=640
 window/size/viewport_height=320
 window/stretch/mode="canvas_items"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/AsepriteWizard/plugin.cfg")
+
 [input]
 
 move_up={
