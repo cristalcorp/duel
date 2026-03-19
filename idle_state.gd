@@ -2,18 +2,20 @@
 class_name IdleState
 extends State
 
-@export var run_state: State
+@export var walk_state: State
 @export var shoot_state: State
 
 func enter(_msg := {}) -> void:
-	actor.velocity.x = 0
-	actor.anim.play("idle")
+	actor.velocity = Vector2.ZERO
+	
+	if actor.has_node("AnimatedSprite2D"):
+		actor.get_node("AnimatedSprite2D").play("Idle")
 
 func physics_update(_delta: float) -> void:
-	var dir := Input.get_axis("move_left", "move_right")
+	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
-	if dir != 0:
-		machine.transition_to(run_state)
+	if direction != Vector2.ZERO:
+		machine.transition_to(walk_state)
 		return
 
 	if Input.is_action_just_pressed("shoot"):

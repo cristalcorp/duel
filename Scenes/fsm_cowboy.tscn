@@ -1,5 +1,9 @@
 [gd_scene format=4 uid="uid://biuygns71divw"]
 
+[ext_resource type="Script" uid="uid://s3gdwf0wrqel" path="res://walk_state.gd" id="1_liycy"]
+[ext_resource type="Script" uid="uid://b25xn638bug21" path="res://state_machine.gd" id="1_nkrce"]
+[ext_resource type="Script" uid="uid://dv6oi5dxm77sb" path="res://idle_state.gd" id="2_1q36g"]
+
 [sub_resource type="PortableCompressedTexture2D" id="PortableCompressedTexture2D_4dggm"]
 _data = PackedByteArray("AAADAAUAAAABAAAAQAAAAEAAAAAmAQAAUklGRh4BAABXRUJQVlA4TBEBAAAvP8APEA8w//M///Mf8ICc7X/a5hOEU2bGI8ORNEaP6Rz436AewaNogy5AHiG99ebnkf72DBH9Z+C2bRwWUNvd+8aYMRPggQf+gWb6eJ4aeQZ22eWl4VHflk13OOML6hlOuIWP7JhqbshyMu1ki2zbETds0TN9PAaj/kcPMbkQe7FX9doiqioLKk4eogOZi3tZ3Iim6kE0qR1NOmJEqXpixIn9+wxWUus68dKtf0M3ASIyI6bZqqfbskS3mejEiItt7aS6slMOSqVISlfOFEZdYsSKxQUbvHhx+37fRx+V4LH74zBmTHei/gsg/zPQEkHQ0Zv8b1oxACg7WjFoik7fpgUz6QLs233fbt5rF+OLMQAA")
 size_override = Vector2(64, 64)
@@ -154,6 +158,7 @@ height = 16.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1984019611]
 texture_filter = 1
+scale = Vector2(5, 5)
 sprite_frames = SubResource("SpriteFrames_h21m2")
 animation = &"Walk"
 metadata/_aseprite_wizard_interface_config_ = {
@@ -181,11 +186,18 @@ metadata/_aseprite_wizard_source_file_hash_ = "c8faef2a2b50c4801e227684acf92684"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2047833520]
 shape = SubResource("CapsuleShape2D_4dggm")
 
-[node name="StateMachine" type="Node" parent="." unique_id=964575658]
+[node name="StateMachine" type="Node" parent="." unique_id=964575658 node_paths=PackedStringArray("initial_state")]
+script = ExtResource("1_nkrce")
+initial_state = NodePath("IdleState")
 
-[node name="IdleState" type="Node" parent="StateMachine" unique_id=1235456721]
+[node name="IdleState" type="Node" parent="StateMachine" unique_id=1235456721 node_paths=PackedStringArray("walk_state")]
+script = ExtResource("2_1q36g")
+walk_state = NodePath("../WalkState")
 
-[node name="WalkState" type="Node" parent="StateMachine" unique_id=214064152]
+[node name="WalkState" type="Node" parent="StateMachine" unique_id=214064152 node_paths=PackedStringArray("idle_state")]
+script = ExtResource("1_liycy")
+idle_state = NodePath("../IdleState")
+speed = 150.0
 
 [node name="ShootState" type="Node" parent="StateMachine" unique_id=2138437663]
 
