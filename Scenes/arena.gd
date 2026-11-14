@@ -26,11 +26,16 @@ const TREE_GAP: float = 25.0
 const START_GAP: float = 30.0
 const MAX_PLACEMENT_TRIES: int = 1000
 const TREE_SCENE: PackedScene = preload("res://Scenes/tree.tscn")
+const RESTART_PROMPT_SCRIPT: Script = preload("res://Scenes/restart_prompt.gd")
+const BANNER_HEIGHT: float = 20.0
+const PROMPT_HEIGHT: float = 14.0
 
 @export var tree_count: int = 8
 @export var lives: int = 5
 ## Wait after a death before the next round starts, in seconds.
 @export var round_end_delay: float = 2.0
+## Wait between the victory text and the restart prompt, in seconds.
+@export var restart_prompt_delay: float = 1.0
 
 @onready var players: Array[Node] = [$Player1, $Player2]
 var lives_left: Array[int] = []
@@ -38,14 +43,24 @@ var lives_labels: Array[Label] = []
 var round_ending: bool = false
 var sudden_death: bool = false
 var banner: Label
+var restart_prompt: Label
 
 
 func _ready() -> void:
 	banner = make_label(Color.WHITE, 16)
-	banner.size = Vector2(get_viewport_rect().size.x, 20)
+	banner.size = Vector2(get_viewport_rect().size.x, BANNER_HEIGHT)
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.z_index = 1
 	add_child(banner)
+	restart_prompt = make_label(Color.WHITE, 10)
+	restart_prompt.set_script(RESTART_PROMPT_SCRIPT)
+	restart_prompt.text = "Press R to restart"
+	restart_prompt.size = Vector2(get_viewport_rect().size.x, PROMPT_HEIGHT)
+	restart_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	restart_prompt.z_index = 1
+	restart_prompt.visible = false
+	restart_prompt.restart_requested.connect(restart_game)
+	add_child(restart_prompt)
 	for i in players.size():
 		var player: Node = players[i]
 		player.bottom_margin = HUD_HEIGHT
@@ -76,14 +91,36 @@ func end_round() -> void:
 			out.append(i)
 	if out.size() == 1:
 		var winner: int = 1 - out[0]
-		banner.text = "PLAYER %d WINS" % (winner + 1)
-		banner.position.y = get_viewport_rect().size.y / 2.0 - 10.0
-		get_tree().paused = true
+		show_victory(winner)
 		return
 	if out.size() == 2:
 		sudden_death = true
 		banner.text = "Mort subite !"
 		banner.position.y = 4.0
+	start_round()
+
+## Victory text and restart prompt form one block centred on the screen; the
+## prompt (and the R key) only comes restart_prompt_delay later, so a key held
+## during the last fight does not restart by mistake.
+func show_victory(winner: int) -> void:
+	get_tree().paused = true
+	banner.text = "PLAYER %d WINS" % (winner + 1)
+	var top: float = (get_viewport_rect().size.y - BANNER_HEIGHT - PROMPT_HEIGHT) / 2.0
+	banner.position.y = top
+	restart_prompt.position.y = top + BANNER_HEIGHT
+	# Runs while paused: SceneTreeTimer ignores pause by default.
+	await get_tree().create_timer(restart_prompt_delay).timeout
+	restart_prompt.visible = true
+
+## New game from scratch: full lives, no sudden death, no text, then a new round.
+func restart_game() -> void:
+	restart_prompt.visible = false
+	banner.text = ""
+	sudden_death = false
+	for i in players.size():
+		lives_left[i] = lives
+		lives_labels[i].text = str(lives)
+	get_tree().paused = false
 	start_round()
 
 func start_round() -> void:
