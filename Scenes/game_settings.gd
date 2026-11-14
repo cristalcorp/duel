@@ -15,6 +15,12 @@ const CHARACTERS: Array[Dictionary] = [
 	{"name": "COWBOY", "scene": preload("res://Scenes/cowboy.tscn")},
 ]
 
+## SOLO mode: player 2 is driven by the computer.
+var solo: bool = false
+const CPU_PLAYER: int = 1
+## The CPU's colour: yellow, or the first colour player 1 left free.
+const CPU_PREFERRED_COLOR := Color(1, 1, 0)
+
 ## Index in CHARACTERS of each player's character.
 var p1_character: int = 0
 var p2_character: int = 0
@@ -40,3 +46,18 @@ func set_character(player: int, index: int) -> void:
 		p1_character = index
 	else:
 		p2_character = index
+
+func is_cpu(player: int) -> bool:
+	return solo and player == CPU_PLAYER
+
+## "PLAYER n", or "CPU" for the computer.
+func player_name(player: int) -> String:
+	return "CPU" if is_cpu(player) else "PLAYER %d" % (player + 1)
+
+## In SOLO, gives the CPU its preferred colour unless player 1 has it.
+func pick_cpu_color() -> void:
+	var taken: Color = get_color(1 - CPU_PLAYER)
+	var color: Color = CPU_PREFERRED_COLOR
+	if color == taken:
+		color = PALETTE[0] if PALETTE[0] != taken else PALETTE[1]
+	set_color(CPU_PLAYER, color)

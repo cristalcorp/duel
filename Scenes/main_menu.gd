@@ -7,7 +7,7 @@ const SELECTION_SCENE: String = "res://Scenes/menu.tscn"
 const PLAYER_SUFFIXES: Array[String] = ["", "_p2"]
 ## Entries in display order; disabled ones are greyed and skipped by the cursor.
 const ENTRIES: Array[Dictionary] = [
-	{"label": "SOLO", "action": "", "enabled": false},
+	{"label": "SOLO", "action": "solo", "enabled": true},
 	{"label": "LOCAL VS", "action": "local_vs", "enabled": true},
 	{"label": "ONLINE VS", "action": "", "enabled": false},
 	{"label": "SETTINGS", "action": "", "enabled": false},
@@ -76,7 +76,11 @@ func move_cursor(step: int) -> void:
 
 func activate(action: String) -> void:
 	match action:
+		"solo":
+			GameSettings.solo = true
+			get_tree().change_scene_to_file(SELECTION_SCENE)
 		"local_vs":
+			GameSettings.solo = false
 			get_tree().change_scene_to_file(SELECTION_SCENE)
 		"quit":
 			get_tree().quit()

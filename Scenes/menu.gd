@@ -2,7 +2,9 @@ extends Node2D
 
 ## Selection screen: each player picks a character (up / down) and a colour
 ## (left / right) with their own game keys, then presses shoot to be ready.
-## The game starts when both are ready. Rules: "Sélection des persos" table.
+## The game starts when both are ready. In SOLO, the CPU column is always ready
+## and its colour follows player 1's choice. Rules: "Sélection des persos" and
+## "Adversaire ordinateur" tables.
 
 const ARENA_SCENE: String = "res://Scenes/arena.tscn"
 const MAIN_MENU_SCENE: String = "res://Scenes/main_menu.tscn"
@@ -33,13 +35,16 @@ var starting: bool = false
 
 
 func _ready() -> void:
+	if GameSettings.solo:
+		ready_flags[GameSettings.CPU_PLAYER] = true
+		GameSettings.pick_cpu_color()
 	for player in 2:
 		build_column(player)
 		refresh(player)
 
 func build_column(player: int) -> void:
 	var x: float = COLUMN_X[player]
-	add_label("PLAYER %d" % (player + 1), x, TITLE_Y, 16)
+	add_label(GameSettings.player_name(player), x, TITLE_Y, 16)
 	add_arrow(player, Vector2(x, CHARACTER_ARROW_UP_Y), Vector2.UP)
 	name_labels.append(add_label("", x, CHARACTER_NAME_Y, 14))
 	add_arrow(player, Vector2(x, CHARACTER_ARROW_DOWN_Y), Vector2.DOWN)
@@ -93,6 +98,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 		return
 	for player in 2:
+		if GameSettings.is_cpu(player):
+			continue
 		var suffix: String = PLAYER_SUFFIXES[player]
 		if event.is_action_pressed("shoot" + suffix):
 			ready_flags[player] = not ready_flags[player]
@@ -109,6 +116,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			continue
 		refresh(player)
+		if GameSettings.solo:
+			refresh(GameSettings.CPU_PLAYER)
 	if ready_flags.all(func(r: bool) -> bool: return r):
 		start_game()
 
@@ -116,9 +125,15 @@ func change_character(player: int, step: int) -> void:
 	var count: int = GameSettings.CHARACTERS.size()
 	GameSettings.set_character(player, posmod(GameSettings.get_character(player) + step, count))
 
-## Next colour in the palette, skipping the other player's colour.
+## Next colour in the palette, skipping the other player's colour. In SOLO
+## player 1 may take any colour: the CPU moves to a free one.
 func change_color(player: int, step: int) -> void:
 	var palette: Array[Color] = GameSettings.PALETTE
+	if GameSettings.solo:
+		var current: int = palette.find(GameSettings.get_color(player))
+		GameSettings.set_color(player, palette[posmod(current + step, palette.size())])
+		GameSettings.pick_cpu_color()
+		return
 	var other: Color = GameSettings.get_color(1 - player)
 	var index: int = palette.find(GameSettings.get_color(player))
 	index = posmod(index + step, palette.size())

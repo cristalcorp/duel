@@ -26,6 +26,7 @@ const START_GAP: float = 30.0
 const MAX_PLACEMENT_TRIES: int = 1000
 const TREE_SCENE: PackedScene = preload("res://Scenes/tree.tscn")
 const RESTART_PROMPT_SCRIPT: Script = preload("res://Scenes/restart_prompt.gd")
+const CPU_BRAIN_SCRIPT: Script = preload("res://Scenes/cpu_brain.gd")
 const BANNER_HEIGHT: float = 20.0
 
 @export var tree_count: int = 8
@@ -108,7 +109,7 @@ func end_round() -> void:
 ## during the last fight does not restart by mistake.
 func show_victory(winner: int) -> void:
 	get_tree().paused = true
-	banner.text = "PLAYER %d WINS" % (winner + 1)
+	banner.text = GameSettings.player_name(winner) + " WINS"
 	# Real height of the prompt lines, as laid out by the font.
 	var prompt_height: float = restart_prompt.get_combined_minimum_size().y
 	var top: float = (get_viewport_rect().size.y - BANNER_HEIGHT - prompt_height) / 2.0
@@ -133,7 +134,7 @@ func back_to_menu() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(MENU_SCENE)
 
-## Both players, with the character and colour picked on the selection screen.
+## Both players (player 2 driven by the CPU in SOLO), with the character and colour picked on the selection screen.
 func spawn_players() -> void:
 	for i in 2:
 		var character: Dictionary = GameSettings.CHARACTERS[GameSettings.get_character(i)]
@@ -145,6 +146,12 @@ func spawn_players() -> void:
 		player.player_color = GameSettings.get_color(i)
 		add_child(player)
 		players.append(player)
+	if GameSettings.solo:
+		var brain := Node.new()
+		brain.set_script(CPU_BRAIN_SCRIPT)
+		brain.name = "CpuBrain"
+		add_child(brain)
+		brain.setup(players[GameSettings.CPU_PLAYER], players[1 - GameSettings.CPU_PLAYER])
 
 func start_round() -> void:
 	for node in get_tree().get_nodes_in_group("bullets") + get_tree().get_nodes_in_group("trees"):

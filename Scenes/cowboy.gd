@@ -32,6 +32,12 @@ var shoot_time_left: float = 0.0
 var dead: bool = false
 var ammo: int
 var start_position: Vector2
+## Set by the CPU brain in SOLO mode: the cowboy then reads these virtual keys
+## instead of the keyboard.
+var is_cpu: bool = false
+var cpu_move: Vector2 = Vector2.ZERO
+## Like a key press: read once, then released.
+var cpu_shoot: bool = false
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 
 
@@ -45,6 +51,7 @@ func _ready() -> void:
 	
 func _physics_process(delta: float) -> void:
 	if dead:
+		cpu_shoot = false
 		return
 
 	# Shooting freezes the cowboy; movement and shoot inputs are ignored meanwhile.
@@ -56,15 +63,16 @@ func _physics_process(delta: float) -> void:
 			anim.pause()
 			anim.frame = SHOOT_HOLD_FRAME
 			fire_bullet()
+		cpu_shoot = false
 		return
 
-	if Input.is_action_just_pressed("shoot" + action_suffix) and ammo > 0:
+	if shoot_pressed() and ammo > 0:
 		shoot_time_left = shoot_duration
 		velocity = Vector2.ZERO
 		anim.play("Shoot")
 		return
 
-	var input_vector: Vector2 = Input.get_vector(
+	var input_vector: Vector2 = cpu_move if is_cpu else Input.get_vector(
 		"move_left" + action_suffix, "move_right" + action_suffix,
 		"move_up" + action_suffix, "move_down" + action_suffix)
 
@@ -75,6 +83,13 @@ func _physics_process(delta: float) -> void:
 	reload_at_own_tree()
 
 	update_animation(input_vector)
+
+func shoot_pressed() -> bool:
+	if not is_cpu:
+		return Input.is_action_just_pressed("shoot" + action_suffix)
+	var pressed: bool = cpu_shoot
+	cpu_shoot = false
+	return pressed
 
 ## Stops each animation frame from showing pixels of its neighbours in the
 ## sprite sheet (a stray bar near the hat at some sub-pixel positions). Done at
@@ -147,6 +162,8 @@ func reset() -> void:
 	dead = false
 	shoot_time_left = 0.0
 	velocity = Vector2.ZERO
+	cpu_move = Vector2.ZERO
+	cpu_shoot = false
 	position = start_position
 	anim.flip_h = facing_left
 	anim.play("Idle")
