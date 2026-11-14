@@ -5,6 +5,7 @@ extends Node2D
 ## The game starts when both are ready. Rules: "Sélection des persos" table.
 
 const ARENA_SCENE: String = "res://Scenes/arena.tscn"
+const MAIN_MENU_SCENE: String = "res://Scenes/main_menu.tscn"
 const PLAYER_SUFFIXES: Array[String] = ["", "_p2"]
 const SHOOT_KEY_NAMES: Array[String] = ["SPACE", "ENTER"]
 ## Horizontal centre of each player's column.
@@ -87,6 +88,9 @@ func add_arrow(player: int, centre: Vector2, direction: Vector2) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if starting or event.is_echo():
+		return
+	if event.is_action_pressed("back"):
+		get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 		return
 	for player in 2:
 		var suffix: String = PLAYER_SUFFIXES[player]
