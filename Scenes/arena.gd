@@ -14,6 +14,10 @@ const AMMO_ICON_GAP: float = 4.0
 const LIVES_GAP: float = 16.0
 ## Extra stroke thickness of the bold lives counter (0 = regular font).
 const LIVES_EMBOLDEN: float = 1.0
+## Raises the lives counter so its digit is centred on the ammo squares: Label
+## centres the whole line (with room below the baseline), not the digit itself.
+## Measured on a rendered frame.
+const LIVES_Y_OFFSET: float = -2.0
 ## Tree footprint (visible pixels) relative to the tree's position, in game pixels.
 const TREE_FOOTPRINT := Rect2(-20, 5, 40, 35)
 ## Free space kept around each tree and around each cowboy's start position.
@@ -161,7 +165,8 @@ func add_ammo_display(player: Node) -> void:
 	bold.variation_embolden = LIVES_EMBOLDEN
 	counter.add_theme_font_override("font", bold)
 	counter.size = Vector2(16, HUD_HEIGHT)
-	counter.position = Vector2(-16 - LIVES_GAP, (AMMO_ICON_SIZE - HUD_HEIGHT) / 2.0)
+	counter.position = Vector2(-16 - LIVES_GAP,
+		(AMMO_ICON_SIZE - HUD_HEIGHT) / 2.0 + LIVES_Y_OFFSET)
 	counter.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	counter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(counter)
