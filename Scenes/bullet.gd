@@ -4,9 +4,13 @@ extends Area2D
 var speed: float = 400.0
 ## Unit vector; set by the shooter, changed by tree bounces.
 var direction: Vector2 = Vector2.RIGHT
-## The cowboy who fired; safe from its own bullet until the first bounce.
+## The cowboy who fired; safe from its own bullet until the first bounce or wrap.
 var shooter: Node2D
-var bounced: bool = false
+var can_hit_shooter: bool = false
+## Screen edges the bullet may cross, coming back on the opposite side; it
+## disappears at the next one.
+@export var max_wraps: int = 1
+var wraps: int = 0
 
 
 func _ready() -> void:
@@ -14,8 +18,18 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	position += direction * speed * delta
-	if not get_viewport_rect().has_point(position):
+	var screen: Rect2 = get_viewport_rect()
+	if screen.has_point(position):
+		return
+	if wraps >= max_wraps:
 		queue_free()
+		return
+	# Out through one edge, in through the opposite one; direction is kept.
+	wraps += 1
+	can_hit_shooter = true
+	position = Vector2(
+		screen.position.x + fposmod(position.x - screen.position.x, screen.size.x),
+		screen.position.y + fposmod(position.y - screen.position.y, screen.size.y))
 
 ## Bounces on a tree's hitbox; kills a cowboy through its hurtbox.
 func _on_area_entered(area: Area2D) -> void:
@@ -23,7 +37,7 @@ func _on_area_entered(area: Area2D) -> void:
 	if owner_node.is_in_group("trees"):
 		bounce()
 		return
-	if owner_node == shooter and not bounced:
+	if owner_node == shooter and not can_hit_shooter:
 		return
 	if owner_node.has_method("hit"):
 		owner_node.hit()
@@ -31,6 +45,6 @@ func _on_area_entered(area: Area2D) -> void:
 
 ## Leaves in a random direction on the side the bullet came from.
 func bounce() -> void:
-	bounced = true
+	can_hit_shooter = true
 	var back: Vector2 = -direction
 	direction = back.rotated(randf_range(-PI / 2.0 * 0.9, PI / 2.0 * 0.9))

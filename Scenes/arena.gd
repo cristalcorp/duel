@@ -41,11 +41,15 @@ var lives_labels: Array[Label] = []
 var round_ending: bool = false
 var sudden_death: bool = false
 var banner: Label
+## Ammo and lives, drawn above the game: bullets pass under them.
+var hud: CanvasLayer
 var restart_prompt: Label
 
 
 func _ready() -> void:
 	spawn_players()
+	hud = CanvasLayer.new()
+	add_child(hud)
 	banner = make_label(Color.WHITE, 16)
 	banner.size = Vector2(get_viewport_rect().size.x, BANNER_HEIGHT)
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -202,7 +206,7 @@ func get_tree_count() -> int:
 ## Row of ammo squares at the bottom of the screen, centred under the player's start.
 func add_ammo_display(player: Node) -> void:
 	var row := Node2D.new()
-	add_child(row)
+	hud.add_child(row)
 	var width: float = player.max_ammo * AMMO_ICON_SIZE + (player.max_ammo - 1) * AMMO_ICON_GAP
 	var top: float = get_viewport_rect().end.y - HUD_HEIGHT + (HUD_HEIGHT - AMMO_ICON_SIZE) / 2.0
 	row.position = Vector2(player.position.x - width / 2.0, top)
