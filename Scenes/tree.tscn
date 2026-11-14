@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://Sprites/Duel/tree.png" id="2_tree"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_core"]
-size = Vector2(4, 4)
+size = Vector2(8, 7)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_full"]
 size = Vector2(8, 7)
