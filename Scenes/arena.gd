@@ -10,6 +10,10 @@ const PALETTE: Array[Color] = [
 const HUD_HEIGHT: float = 16.0
 const AMMO_ICON_SIZE: float = 8.0
 const AMMO_ICON_GAP: float = 4.0
+## Space between the lives counter and the first ammo square.
+const LIVES_GAP: float = 16.0
+## Extra stroke thickness of the bold lives counter (0 = regular font).
+const LIVES_EMBOLDEN: float = 1.0
 ## Tree footprint (visible pixels) relative to the tree's position, in game pixels.
 const TREE_FOOTPRINT := Rect2(-20, 5, 40, 35)
 ## Free space kept around each tree and around each cowboy's start position.
@@ -151,8 +155,13 @@ func add_ammo_display(player: Node) -> void:
 		row.add_child(icon)
 	var counter := make_label(player.player_color, 14)
 	counter.text = str(lives)
+	# Bold: the default font has no bold face, so thicken its strokes instead.
+	var bold := FontVariation.new()
+	bold.base_font = ThemeDB.fallback_font
+	bold.variation_embolden = LIVES_EMBOLDEN
+	counter.add_theme_font_override("font", bold)
 	counter.size = Vector2(16, HUD_HEIGHT)
-	counter.position = Vector2(-16 - AMMO_ICON_GAP, (AMMO_ICON_SIZE - HUD_HEIGHT) / 2.0)
+	counter.position = Vector2(-16 - LIVES_GAP, (AMMO_ICON_SIZE - HUD_HEIGHT) / 2.0)
 	counter.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	counter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(counter)
