@@ -1,11 +1,10 @@
 extends Node2D
 
-## Videopac sprite colours, black excluded (invisible on the background).
-## Exact RGB values of the console are unknown: pure colours are used.
-const PALETTE: Array[Color] = [
-	Color(1, 1, 1), Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1),
-	Color(1, 1, 0), Color(0, 1, 1), Color(1, 0, 1),
-]
+const MENU_SCENE: String = "res://Scenes/menu.tscn"
+## Start position, input suffix and facing of player 1 and player 2.
+const PLAYER_STARTS: Array[Vector2] = [Vector2(120, 160), Vector2(520, 160)]
+const PLAYER_SUFFIXES: Array[String] = ["", "_p2"]
+const PLAYER_FACING_LEFT: Array[bool] = [false, true]
 ## Band at the bottom of the screen holding the ammo display.
 const HUD_HEIGHT: float = 16.0
 const AMMO_ICON_SIZE: float = 8.0
@@ -28,7 +27,6 @@ const MAX_PLACEMENT_TRIES: int = 1000
 const TREE_SCENE: PackedScene = preload("res://Scenes/tree.tscn")
 const RESTART_PROMPT_SCRIPT: Script = preload("res://Scenes/restart_prompt.gd")
 const BANNER_HEIGHT: float = 20.0
-const PROMPT_HEIGHT: float = 14.0
 
 @export var tree_count: int = 8
 @export var lives: int = 5
@@ -37,7 +35,7 @@ const PROMPT_HEIGHT: float = 14.0
 ## Wait between the victory text and the restart prompt, in seconds.
 @export var restart_prompt_delay: float = 1.0
 
-@onready var players: Array[Node] = [$Player1, $Player2]
+var players: Array[Node] = []
 var lives_left: Array[int] = []
 var lives_labels: Array[Label] = []
 var round_ending: bool = false
@@ -47,6 +45,7 @@ var restart_prompt: Label
 
 
 func _ready() -> void:
+	spawn_players()
 	banner = make_label(Color.WHITE, 16)
 	banner.size = Vector2(get_viewport_rect().size.x, BANNER_HEIGHT)
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -54,12 +53,13 @@ func _ready() -> void:
 	add_child(banner)
 	restart_prompt = make_label(Color.WHITE, 10)
 	restart_prompt.set_script(RESTART_PROMPT_SCRIPT)
-	restart_prompt.text = "Press R to restart"
-	restart_prompt.size = Vector2(get_viewport_rect().size.x, PROMPT_HEIGHT)
+	restart_prompt.text = "Press R to restart\nPress M for menu"
+	restart_prompt.size = Vector2(get_viewport_rect().size.x, 0)
 	restart_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	restart_prompt.z_index = 1
 	restart_prompt.visible = false
 	restart_prompt.restart_requested.connect(restart_game)
+	restart_prompt.menu_requested.connect(back_to_menu)
 	add_child(restart_prompt)
 	for i in players.size():
 		var player: Node = players[i]
@@ -105,7 +105,9 @@ func end_round() -> void:
 func show_victory(winner: int) -> void:
 	get_tree().paused = true
 	banner.text = "PLAYER %d WINS" % (winner + 1)
-	var top: float = (get_viewport_rect().size.y - BANNER_HEIGHT - PROMPT_HEIGHT) / 2.0
+	# Real height of the prompt lines, as laid out by the font.
+	var prompt_height: float = restart_prompt.get_combined_minimum_size().y
+	var top: float = (get_viewport_rect().size.y - BANNER_HEIGHT - prompt_height) / 2.0
 	banner.position.y = top
 	restart_prompt.position.y = top + BANNER_HEIGHT
 	# Runs while paused: SceneTreeTimer ignores pause by default.
@@ -122,6 +124,23 @@ func restart_game() -> void:
 		lives_labels[i].text = str(lives)
 	get_tree().paused = false
 	start_round()
+
+func back_to_menu() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file(MENU_SCENE)
+
+## Both players, with the character and colour picked on the selection screen.
+func spawn_players() -> void:
+	for i in 2:
+		var character: Dictionary = GameSettings.CHARACTERS[GameSettings.get_character(i)]
+		var player: Node2D = character["scene"].instantiate()
+		player.name = "Player%d" % (i + 1)
+		player.position = PLAYER_STARTS[i]
+		player.action_suffix = PLAYER_SUFFIXES[i]
+		player.facing_left = PLAYER_FACING_LEFT[i]
+		player.player_color = GameSettings.get_color(i)
+		add_child(player)
+		players.append(player)
 
 func start_round() -> void:
 	for node in get_tree().get_nodes_in_group("bullets") + get_tree().get_nodes_in_group("trees"):
@@ -151,7 +170,7 @@ func spawn_trees() -> void:
 	var colors: Array[Color] = []
 	for player in players:
 		colors.append(player.player_color)
-	var others: Array[Color] = PALETTE.filter(func(c: Color) -> bool: return not c in colors)
+	var others: Array[Color] = GameSettings.PALETTE.filter(func(c: Color) -> bool: return not c in colors)
 	while colors.size() < tree_count:
 		colors.append(others.pick_random())
 
