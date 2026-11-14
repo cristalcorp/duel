@@ -13,8 +13,8 @@ const AMMO_ICON_GAP: float = 4.0
 ## Tree footprint (visible pixels) relative to the tree's position, in game pixels.
 const TREE_FOOTPRINT := Rect2(-20, 5, 40, 35)
 ## Free space kept around each tree and around each cowboy's start position.
-## Two trees end up at least 2 × TREE_GAP apart, wider than a cowboy's feet (30 px).
-const TREE_GAP: float = 20.0
+## Two trees end up at least 2 × TREE_GAP apart, wider than a cowboy's body (40 px).
+const TREE_GAP: float = 25.0
 const START_GAP: float = 30.0
 const MAX_PLACEMENT_TRIES: int = 1000
 const TREE_SCENE: PackedScene = preload("res://Scenes/tree.tscn")

@@ -1,8 +1,7 @@
 extends CharacterBody2D
 
-# Collision layers: Feet (layer 3) bump into tree cores (layer 2) and the other
-# cowboy's feet, so a cowboy can walk behind the top of a tree. Bullets hit the
-# Hurtbox (layer 1), which covers the whole body.
+# Collision layers: Body (layer 3) covers the whole cowboy and bumps into trees
+# (layer 2) and the other cowboy. Bullets hit the Hurtbox (layer 1), same shape.
 
 signal ammo_changed(ammo: int)
 signal died
@@ -127,7 +126,7 @@ func hit() -> void:
 	dead = true
 	shoot_time_left = 0.0
 	velocity = Vector2.ZERO
-	$Feet.set_deferred("disabled", true)
+	$Body.set_deferred("disabled", true)
 	$Hurtbox/CollisionShape2D.set_deferred("disabled", true)
 	anim.play("Death")
 	died.emit()
@@ -140,6 +139,6 @@ func reset() -> void:
 	position = start_position
 	anim.flip_h = facing_left
 	anim.play("Idle")
-	$Feet.set_deferred("disabled", false)
+	$Body.set_deferred("disabled", false)
 	$Hurtbox/CollisionShape2D.set_deferred("disabled", false)
 	set_ammo(max_ammo)
