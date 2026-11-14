@@ -141,6 +141,7 @@ func refresh(player: int) -> void:
 func get_sprite_frames(scene: PackedScene) -> SpriteFrames:
 	var character: Node = scene.instantiate()
 	var frames: SpriteFrames = character.get_node("AnimatedSprite2D").sprite_frames
+	character.clip_atlas_frames(frames)
 	character.free()
 	return frames
 

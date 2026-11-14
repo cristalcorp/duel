@@ -36,6 +36,7 @@ var start_position: Vector2
 
 
 func _ready() -> void:
+	clip_atlas_frames(anim.sprite_frames)
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	anim.flip_h = facing_left
 	modulate = player_color
@@ -74,6 +75,16 @@ func _physics_process(delta: float) -> void:
 	reload_at_own_tree()
 
 	update_animation(input_vector)
+
+## Stops each animation frame from showing pixels of its neighbours in the
+## sprite sheet (a stray bar near the hat at some sub-pixel positions). Done at
+## run time so it survives a re-import from Aseprite.
+static func clip_atlas_frames(frames: SpriteFrames) -> void:
+	for animation in frames.get_animation_names():
+		for i in frames.get_frame_count(animation):
+			var atlas := frames.get_frame_texture(animation, i) as AtlasTexture
+			if atlas:
+				atlas.filter_clip = true
 
 ## Keeps the whole body inside the screen.
 func stay_on_screen() -> void:
