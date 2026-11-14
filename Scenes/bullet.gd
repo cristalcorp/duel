@@ -7,9 +7,9 @@ var direction: Vector2 = Vector2.RIGHT
 ## The cowboy who fired; safe from its own bullet until the first bounce or wrap.
 var shooter: Node2D
 var can_hit_shooter: bool = false
-## Screen edges the bullet may cross, coming back on the opposite side; it
-## disappears at the next one.
-@export var max_wraps: int = 1
+## Seconds before the bullet disappears; until then it crosses screen edges as
+## often as needed, coming back on the opposite side.
+@export var lifetime: float = 3.0
 var wraps: int = 0
 
 
@@ -17,12 +17,13 @@ func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 
 func _physics_process(delta: float) -> void:
+	lifetime -= delta
+	if lifetime <= 0.0:
+		queue_free()
+		return
 	position += direction * speed * delta
 	var screen: Rect2 = get_viewport_rect()
 	if screen.has_point(position):
-		return
-	if wraps >= max_wraps:
-		queue_free()
 		return
 	# Out through one edge, in through the opposite one; direction is kept.
 	wraps += 1
