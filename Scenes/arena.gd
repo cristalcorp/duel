@@ -76,7 +76,7 @@ func end_round() -> void:
 			out.append(i)
 	if out.size() == 1:
 		var winner: int = 1 - out[0]
-		banner.text = "Joueur %d wins !" % (winner + 1)
+		banner.text = "PLAYER %d WINS" % (winner + 1)
 		banner.position.y = get_viewport_rect().size.y / 2.0 - 10.0
 		get_tree().paused = true
 		return
