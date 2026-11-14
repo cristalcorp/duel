@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/tree.gd" id="1_tree"]
+[ext_resource type="Texture2D" path="res://Sprites/Duel/tree.png" id="2_tree"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_core"]
+size = Vector2(4, 4)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_full"]
+size = Vector2(8, 7)
+
+[node name="Tree" type="StaticBody2D" groups=["trees"]]
+scale = Vector2(5, 5)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_tree")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_tree")
+
+[node name="Core" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4.5)
+shape = SubResource("RectangleShape2D_core")
+
+[node name="BulletHitbox" type="Area2D" parent="."]
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BulletHitbox"]
+position = Vector2(0, 4.5)
+shape = SubResource("RectangleShape2D_full")

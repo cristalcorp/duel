@@ -6,6 +6,9 @@
 radius = 4.0
 height = 16.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_feet"]
+size = Vector2(6, 3)
+
 [sub_resource type="PortableCompressedTexture2D" id="PortableCompressedTexture2D_c0tv1"]
 _data = PackedByteArray("AAADAAUAAAABAAAAQAAAAEAAAAAmAQAAUklGRh4BAABXRUJQVlA4TBEBAAAvP8APEA8w//M///Mf8ICc7X/a5hOEU2bGI8ORNEaP6Rz436AewaNogy5AHiG99ebnkf72DBH9Z+C2bRwWUNvd+8aYMRPggQf+gWb6eJ4aeQZ22eWl4VHflk13OOML6hlOuIWP7JhqbshyMu1ki2zbETds0TN9PAaj/kcPMbkQe7FX9doiqioLKk4eogOZi3tZ3Iim6kE0qR1NOmJEqXpixIn9+wxWUus68dKtf0M3ASIyI6bZqqfbskS3mejEiItt7aS6slMOSqVISlfOFEZdYsSKxQUbvHhx+37fRx+V4LH74zBmTHei/gsg/zPQEkHQ0Zv8b1oxACg7WjFoik7fpgUz6QLs233fbt5rF+OLMQAA")
 size_override = Vector2(64, 64)
@@ -102,7 +105,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_sj18n")
 }],
-"loop": true,
+"loop": false,
 "name": &"Death",
 "speed": 6.0
 }, {
@@ -124,7 +127,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_mldxk")
 }],
-"loop": true,
+"loop": false,
 "name": &"Shoot",
 "speed": 5.0
 }, {
@@ -155,10 +158,19 @@ animations = [{
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=324560824]
 scale = Vector2(5, 5)
 motion_mode = 1
+collision_layer = 4
+collision_mask = 6
 script = ExtResource("1_4rmwn")
 speed = 150.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1824014539]
+[node name="Feet" type="CollisionShape2D" parent="."]
+position = Vector2(0, 6.5)
+shape = SubResource("RectangleShape2D_feet")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1824014539]
 shape = SubResource("CapsuleShape2D_c0tv1")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1629048969]
