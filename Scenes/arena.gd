@@ -146,7 +146,10 @@ func spawn_players() -> void:
 		player.player_color = GameSettings.get_color(i)
 		add_child(player)
 		players.append(player)
-	if GameSettings.solo:
+	if GameSettings.online:
+		for player in players:
+			player.is_driven = true
+	elif GameSettings.solo:
 		var brain := Node.new()
 		brain.set_script(CPU_BRAIN_SCRIPT)
 		brain.name = "CpuBrain"

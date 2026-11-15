@@ -4,12 +4,14 @@ extends Node2D
 ## cursor and validates with their shoot key. Rules: "Menu principal" table.
 
 const SELECTION_SCENE: String = "res://Scenes/menu.tscn"
+const ONLINE_SCENE: String = "res://Scenes/online.tscn"
+const SERVER_SCENE: String = "res://Scenes/server.tscn"
 const PLAYER_SUFFIXES: Array[String] = ["", "_p2"]
 ## Entries in display order; disabled ones are greyed and skipped by the cursor.
 const ENTRIES: Array[Dictionary] = [
 	{"label": "SOLO", "action": "solo", "enabled": true},
 	{"label": "LOCAL VS", "action": "local_vs", "enabled": true},
-	{"label": "ONLINE VS", "action": "", "enabled": false},
+	{"label": "ONLINE VS", "action": "online", "enabled": true},
 	{"label": "SETTINGS", "action": "", "enabled": false},
 	{"label": "QUIT", "action": "quit", "enabled": true},
 ]
@@ -30,6 +32,10 @@ var cursor: Polygon2D
 
 
 func _ready() -> void:
+	# "godot --headless --path . -- --server" starts the ONLINE VS server.
+	if "--server" in OS.get_cmdline_user_args():
+		get_tree().change_scene_to_file.call_deferred(SERVER_SCENE)
+		return
 	var width: float = get_viewport_rect().size.x
 	var title := make_label("DUEL", 32, width)
 	title.position.y = TITLE_Y
@@ -82,6 +88,8 @@ func activate(action: String) -> void:
 		"local_vs":
 			GameSettings.solo = false
 			get_tree().change_scene_to_file(SELECTION_SCENE)
+		"online":
+			get_tree().change_scene_to_file(ONLINE_SCENE)
 		"quit":
 			get_tree().quit()
 

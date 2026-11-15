@@ -17,6 +17,8 @@ const CHARACTERS: Array[Dictionary] = [
 
 ## SOLO mode: player 2 is driven by the computer.
 var solo: bool = false
+## Set on the ONLINE VS server: both players are driven by their network keys.
+var online: bool = false
 const CPU_PLAYER: int = 1
 ## The CPU's colour: yellow, or the first colour player 1 left free.
 const CPU_PREFERRED_COLOR := Color(1, 1, 0)

@@ -31,7 +31,7 @@ var last_position: Vector2
 func setup(cowboy: Node2D, target: Node2D) -> void:
 	me = cowboy
 	foe = target
-	me.is_cpu = true
+	me.is_driven = true
 	last_position = me.position
 
 func _physics_process(delta: float) -> void:
@@ -46,14 +46,14 @@ func _physics_process(delta: float) -> void:
 ## One decision; the first matching rule wins (same order as the table).
 func decide() -> void:
 	if me.dead or foe.dead:
-		me.cpu_move = Vector2.ZERO
+		me.driven_move = Vector2.ZERO
 		detour_left = 0.0
 		return
 	if me.shoot_time_left > 0.0:
 		return
 	if is_stuck():
 		# Sideways to the blocked direction, to one side at random.
-		var side: Vector2 = me.cpu_move.orthogonal().normalized()
+		var side: Vector2 = me.driven_move.orthogonal().normalized()
 		start_detour(side if randf() < 0.5 else -side)
 		return
 	if detour_left > 0.0:
@@ -79,24 +79,24 @@ func decide() -> void:
 				away = 1.0 if randf() < 0.5 else -1.0
 			start_detour(Vector2(signf(gap.x), away).normalized())
 		elif (gap.x < 0.0) == me.anim.flip_h:
-			me.cpu_move = Vector2.ZERO
+			me.driven_move = Vector2.ZERO
 			# One bullet at a time: a second one would fly through the dead
 			# target, cross the edge and come back at the CPU.
-			me.cpu_shoot = not has_bullet_in_play()
+			me.driven_shoot = not has_bullet_in_play()
 		else:
 			# One step towards the target turns the cowboy round.
-			me.cpu_move = Vector2(signf(gap.x), 0.0)
+			me.driven_move = Vector2(signf(gap.x), 0.0)
 		return
 
 	approach(aim_gap)
 
 ## Walked into something (a tree, the other cowboy, an edge) since last decision.
 func is_stuck() -> bool:
-	return me.cpu_move != Vector2.ZERO \
+	return me.driven_move != Vector2.ZERO \
 		and me.position.distance_to(last_position) < STUCK_DISTANCE
 
 func start_detour(direction: Vector2) -> void:
-	me.cpu_move = direction
+	me.driven_move = direction
 	detour_left = detour_time
 
 ## Up to the target's height; back off or close in to stay between
@@ -109,15 +109,15 @@ func approach(gap: Vector2) -> void:
 		horizontal = -signf(gap.x)
 	elif absf(gap.x) > max_distance:
 		horizontal = signf(gap.x)
-	me.cpu_move = Vector2(horizontal, vertical).limit_length(1.0)
+	me.driven_move = Vector2(horizontal, vertical).limit_length(1.0)
 
 func walk_to_own_tree() -> void:
 	var tree: Node2D = find_own_tree()
 	if tree == null:
-		me.cpu_move = Vector2.ZERO
+		me.driven_move = Vector2.ZERO
 		return
 	var centre: Vector2 = tree_footprint(tree).get_center()
-	me.cpu_move = (centre - me.position).normalized()
+	me.driven_move = (centre - me.position).normalized()
 
 func find_own_tree() -> Node2D:
 	for tree in get_tree().get_nodes_in_group("trees"):
